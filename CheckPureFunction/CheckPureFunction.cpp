@@ -2,6 +2,9 @@
 #include "llvm/IR/Function.h"
 #include "llvm/Support/raw_ostream.h"
 
+#include "llvm/IR/LegacyPassManager.h"
+#include "llvm/Transforms/IPO/PassManagerBuilder.h"
+
 using namespace llvm;
 
 
@@ -9,6 +12,7 @@ namespace {
   struct CheckPureFunction : public FunctionPass {
     static char ID;
     CheckPureFunction() : FunctionPass(ID) {}
+
     bool runOnFunction(Function &F) override {
       errs() << ">-----------------------|\n";
       errs() << "Ime funkcije: ";
@@ -20,9 +24,18 @@ namespace {
       errs() << ">-----------------------|\n";
       return false;
     }
+
+    void getAnalysisUsage(AnalysisUsage &AU) const override {
+      AU.setPreservesAll();
+    }
   };
 }
 
 
 char CheckPureFunction::ID = 0;
-static RegisterPass<CheckPureFunction> X("cpf", "Proverava da li je funkcija cista", false, true);
+static RegisterPass<CheckPureFunction> X("cpf", "Proverava da li je funkcija cista", true, true);
+
+static llvm::RegisterStandardPasses Y(
+    llvm::PassManagerBuilder::EP_EarlyAsPossible,
+    [](const llvm::PassManagerBuilder &Builder,
+       llvm::legacy::PassManagerBase &PM) { PM.add(new CheckPureFunction()); });
