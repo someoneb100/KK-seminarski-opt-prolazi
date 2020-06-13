@@ -7,6 +7,7 @@
   #include "llvm/IR/Instructions.h"
   #include "llvm/Support/Casting.h"
   #include "llvm/IR/InstrTypes.h"
+  #include "llvm/Support/raw_ostream.h"
 
   using namespace llvm;
 

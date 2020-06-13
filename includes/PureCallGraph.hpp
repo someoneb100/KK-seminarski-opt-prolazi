@@ -1,18 +1,18 @@
 #ifndef __PURE_CALL_GRAPH__
   #define __PURE_CALL_GRAPH__ 1
   #include <map>
+  #include <set>
   using namespace std;
 
-  #include "../includes/PureFunctionInfo.hpp"
+  #include "llvm/IR/Function.h"
+  using namespace llvm;
 
   class PureCallGraph{
     private:
-      map<Function*, PureFunctionInfo*> information;
+      map<Function*, set<Function*>> calledBy;
     public:
-      void addFunction(Function* F);
-      PureFunctionInfo* getFunction(Function* F);
+      void add(Function* F);
       void connect(Function* Caller, Function* Callee);
-      void sync();
-      void printResults() const;
+      set<Function*> getDependancies(Function* F);
   };
 #endif

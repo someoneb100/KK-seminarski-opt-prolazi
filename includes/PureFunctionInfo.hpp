@@ -9,8 +9,6 @@
   class PureFunctionInfo{
   private:
     Function* thisFuncton;
-    set<Function*> CalledBy;
-    set<Function*> Calls;
     set<Function*> Externals;
     bool isPure;
     bool isExternal;
@@ -20,8 +18,6 @@
     bool isExternalFunction(){return isExternal;}
     Function* getFunction(){return thisFuncton;}
     bool hasExternalFunctions(){return !Externals.empty();}
-    void addCalledBy(PureFunctionInfo* F);
-    void addCalls(PureFunctionInfo* F);
-    bool addExternal(PureFunctionInfo* F);
+    void addExternal(PureFunctionInfo* F);
   };
 #endif
