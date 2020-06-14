@@ -8,6 +8,7 @@
   #include "llvm/Support/Casting.h"
   #include "llvm/IR/InstrTypes.h"
   #include "llvm/Support/raw_ostream.h"
+  #include "llvm/IR/GlobalVariable.h"
 
   using namespace llvm;
 

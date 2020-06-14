@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const int globalnoCetiri = 4;
+int globalnoCetiri = 4;
 int vraca5();
 int mnoziCisto(int a, int b);
 int mnoziSaCetiriPrljavo(int a);

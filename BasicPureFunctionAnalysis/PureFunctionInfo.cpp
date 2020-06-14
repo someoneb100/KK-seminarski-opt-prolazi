@@ -5,10 +5,28 @@ PureFunctionInfo::PureFunctionInfo(Function* F){
   thisFuncton = F;
   isExternal = F->empty();
   isPure = !isExternal;
+  isGlobal = false;
 }
 
 void PureFunctionInfo::addExternal(PureFunctionInfo* F){
-  Function* f = F->getFunction();
-  Externals.insert(f);
+  this->addExternal(F->getFunction());
+}
+
+void PureFunctionInfo::addExternal(Function* F){
+  Externals.insert(F);
   isPure = false;
+}
+void PureFunctionInfo::addGlobal(Value* V){
+  Globals.insert(V);
+  isPure = false;
+  isGlobal = true;
+}
+
+
+void PureFunctionInfo::addGlobal(Function* F){
+    GlobalFs.insert(F);
+    isPure = false;
+}
+void PureFunctionInfo::addGlobal(PureFunctionInfo* F){
+  this->addGlobal(F->getFunction());
 }
