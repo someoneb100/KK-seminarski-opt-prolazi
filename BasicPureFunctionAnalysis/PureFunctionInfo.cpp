@@ -6,6 +6,12 @@ PureFunctionInfo::PureFunctionInfo(Function* F){
   isExternal = F->empty();
   isPure = !isExternal;
   isGlobal = false;
+  PointerArguments = 0;
+}
+
+void PureFunctionInfo::setPointerAttributes(unsigned i){
+  PointerArguments = i;
+  isPure = !i;
 }
 
 void PureFunctionInfo::addExternal(PureFunctionInfo* F){

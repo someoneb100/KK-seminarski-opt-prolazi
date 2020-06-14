@@ -10,11 +10,14 @@ using namespace std;
 PureCallGraph graf;
 map<Function*, PureFunctionInfo*> podaci;
 set<Value*> globalne;
+set<Value*> globalneKonstante;
 bool BasicPureFunctionAnalysis::runOnModule(Module &M) {
   //provera postojanja globalnih promenljivih
   auto krajGlobalnih = M.getGlobalList().end();
-  for(auto it = M.getGlobalList().begin(); it!=krajGlobalnih; it++)
-    if(!it->isConstant()) globalne.insert(&(*it));
+  for(auto it = M.getGlobalList().begin(); it!=krajGlobalnih; it++){
+    if(it->isConstant()) globalneKonstante.insert(&(*it));
+    else globalne.insert(&(*it));
+  }
 
 
   //Punjenje memorije
@@ -22,6 +25,15 @@ bool BasicPureFunctionAnalysis::runOnModule(Module &M) {
     Function* f = &(*F);
     graf.add(f);
     if(podaci.find(f) == podaci.end()) podaci[f] = new PureFunctionInfo(f);
+
+    //Provera argumenata
+    FunctionType* a = f->getFunctionType();
+    for(auto Arg = a->param_begin(); Arg != a->param_end(); Arg++){
+      int broj_pokazivackih_argumenata = 0;
+      if((*Arg)->isPointerTy() && !(cast<PointerType>(*Arg)->getElementType()->isFunctionTy()))
+        broj_pokazivackih_argumenata++;
+      if(broj_pokazivackih_argumenata) podaci[f]->setPointerAttributes(broj_pokazivackih_argumenata);
+      }
 
     //Provera pojedinacnih instrukcija
     for (const BasicBlock &BB : *F){
@@ -35,6 +47,9 @@ bool BasicPureFunctionAnalysis::runOnModule(Module &M) {
           if (globalne.find(Op) != globalne.end()){
             podaci[f]->addGlobal(Op);
           }
+          //Type* T = Op->getType();
+          //if(T->isPointerTy() && !(cast<PointerType>(*T).getElementType()->isFunctionTy()))
+            //errs().write_escaped(Op->getName()) << '\n';
         }
       }
     }
@@ -50,7 +65,7 @@ bool BasicPureFunctionAnalysis::runOnModule(Module &M) {
       auto krajZavisnosti = zavisnosti.end();
       for(auto it2 = zavisnosti.begin(); it2 != krajZavisnosti; it2++){
         if(F->isExternalFunction()) podaci[*it2]->addExternal(F);
-        if(F->isGlobalFunction()) podaci[*it2]->addGlobal(F);
+        if(F->isGlobalFunction() || F->getNumberOfPointerAttributes()) podaci[*it2]->addGlobal(F);
       }
     }
   }
@@ -65,12 +80,14 @@ bool BasicPureFunctionAnalysis::runOnModule(Module &M) {
       errs()<<"Cista funkcija!\n";
     if(F->isExternalFunction())
       errs()<<"Funkcija nije definisana, ne moze se ustanoviti cistost pre linkovanja\n";
-    if(F->hasExternalFunctions())
+    if(F->hasExternalFunctions() && !F->hasGlobalFunctions())
       errs()<<"Funkcija poziva nedefinisane funkcije, ne moze se ustanoviti cistost pre linkovanja\n";
     if(F->isGlobalFunction())
       errs()<<"Funkcija koristi globalne promenljive\n";
     if(F->hasGlobalFunctions())
-      errs()<<"Funkcija poziva funkcije koje koriste globalne promenljive\n";
+      errs()<<"Funkcija poziva neciste funkcije\n";
+    if(F->getNumberOfPointerAttributes())
+      errs()<<"Funkcija ima pokazivacke argumente\n";
     errs()<<">-------------------------------------------------------|\n";
   }
 

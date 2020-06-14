@@ -12,6 +12,7 @@
     set<Function*> Externals;
     set<Function*> GlobalFs;
     set<Value*> Globals;
+    unsigned PointerArguments;
     bool isPure;
     bool isExternal;
     bool isGlobal;
@@ -20,7 +21,8 @@
     bool isPureFunction(){return isPure;}
     bool isExternalFunction(){return isExternal;}
     bool isGlobalFunction(){return isGlobal;}
-    bool isDirectlyImpureFunction(){return !isPure && (isExternal || isGlobal);}
+    bool isDirectlyImpureFunction(){return !isPure && (isExternal || isGlobal || PointerArguments);}
+    bool getNumberOfPointerAttributes(){return PointerArguments;}
     Function* getFunction(){return thisFuncton;}
     bool hasGlobalFunctions(){return !GlobalFs.empty();}
     bool hasExternalFunctions(){return !Externals.empty();}
@@ -29,5 +31,6 @@
     void addGlobal(Value* V);
     void addGlobal(Function* V);
     void addGlobal(PureFunctionInfo* V);
+    void setPointerAttributes(unsigned i);
   };
 #endif
